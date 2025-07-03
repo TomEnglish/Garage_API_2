@@ -1,0 +1,25 @@
+# Python
+*.pyc
+__pycache__/
+venv/
+.venv/
+env/
+ENV/
+dist/
+build/
+*.egg-info/
+
+# Flask
+instance/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Sensitive files
+.env
+config.py
