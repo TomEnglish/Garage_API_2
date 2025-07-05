@@ -6,13 +6,15 @@ from app.models import ServiceTickets, Mechanics, Inventory, ServiceInventory, d
 from .schemas import servicetickets_schema, serviceticket_schema
 from .schemas import edit_service_ticket_schema, edit_service_ticket_inventory_schema
 from app.extensions import limiter, cache
+from app.utils.util import token_required
 
 
 
 # POST '/': Pass in all the required information to create the service_ticket.
 @tickets_db.route("/", methods=['POST'])
+@token_required
 @limiter.limit("20/hour") #how many tickets per day or hour would be reasonabe...not too many
-def create_ticket():
+def create_ticket(current_customer_id):
     try:
         ticket_data = serviceticket_schema.load(request.json)
     except ValidationError as e:
@@ -24,6 +26,7 @@ def create_ticket():
     if existing_ticket:
         return jsonify({"error": f"Service ticket with VIN {ticket_data.vin} already exists"}), 400
     
+    ticket_data.customer_id = current_customer_id
     new_ticket = ticket_data
     db.session.add(new_ticket)
     db.session.commit()

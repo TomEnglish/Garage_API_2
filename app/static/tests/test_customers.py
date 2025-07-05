@@ -1,8 +1,9 @@
 import unittest
 import json
 from app import create_app
-from app.models import db, Customer
+from app.models import db, Customer, ServiceTickets
 from app.utils.util import encode_token
+from datetime import date
 
 class TestCustomers(unittest.TestCase):
     def setUp(self):
@@ -164,17 +165,28 @@ class TestCustomers(unittest.TestCase):
             customer = Customer(name='My Tickets Test', email='mytickets@test.com', phone='7777777777', password='password')
             db.session.add(customer)
             db.session.commit()
+
+            ticket = ServiceTickets(
+                vin="TestVIN123",
+                service_date=date(2023, 1, 1),
+                service_desc="Test service",
+                customer_id=customer.id
+            )
+            db.session.add(ticket)
+            db.session.commit()
+
             token = encode_token(customer.id)
             headers = {'Authorization': f'Bearer {token}'}
             response = self.client.get('/customers/my-tickets', headers=headers)
             self.assertEqual(response.status_code, 200)
+            self.assertIn("TestVIN123", str(response.data))
 
     def test_get_my_tickets_unauthorized(self):
         # Test that retrieving tickets without authorization fails
         with self.app.app_context():
             response = self.client.get('/customers/my-tickets')
             self.assertEqual(response.status_code, 401)
-            self.assertIn('Token is missing', str(response.data))
+            self.assertIn('Authorization header is missing', str(response.data))
 
 if __name__ == '__main__':
     unittest.main()

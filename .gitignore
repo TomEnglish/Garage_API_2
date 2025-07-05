@@ -23,3 +23,4 @@ Thumbs.db
 # Sensitive files
 .env
 config.py
+app/static/swagger.yaml

@@ -32,6 +32,17 @@ class ServiceTicketsTestCase(unittest.TestCase):
             'customer_id': self.customer_id
         }
 
+        # Login the test customer to get a token
+        login_data = {
+            'email': 'test@customer.com',
+            'password': 'password'
+        }
+        res = self.client.post('/customers/login', data=json.dumps(login_data), content_type='application/json')
+        self.auth_token = json.loads(res.data)['auth_token']
+        self.headers = {
+            'Authorization': f'Bearer {self.auth_token}'
+        }
+
     def tearDown(self):
         """teardown all initialized variables."""
         with self.app.app_context():
@@ -44,7 +55,7 @@ class ServiceTicketsTestCase(unittest.TestCase):
         This test sends a POST request to the '/service_tickets/' endpoint with valid ticket data
         and asserts that the response status code is 201 (Created) and the new ticket's VIN is in the response.
         """
-        res = self.client.post('/service_tickets/', data=json.dumps(self.service_ticket), content_type='application/json')
+        res = self.client.post('/service_tickets/', data=json.dumps(self.service_ticket), headers=self.headers, content_type='application/json')
         self.assertEqual(res.status_code, 201)
         self.assertIn('1234567890ABCDEFG', str(res.data))
 
@@ -54,8 +65,8 @@ class ServiceTicketsTestCase(unittest.TestCase):
         This test first creates a service ticket and then attempts to create another ticket with the same VIN.
         It asserts that the second request fails with a 400 status code and an appropriate error message.
         """
-        self.client.post('/service_tickets/', data=json.dumps(self.service_ticket), content_type='application/json')
-        res = self.client.post('/service_tickets/', data=json.dumps(self.service_ticket), content_type='application/json')
+        self.client.post('/service_tickets/', data=json.dumps(self.service_ticket), headers=self.headers, content_type='application/json')
+        res = self.client.post('/service_tickets/', data=json.dumps(self.service_ticket), headers=self.headers, content_type='application/json')
         self.assertEqual(res.status_code, 400)
         self.assertIn('already exists', str(res.data))
 
@@ -65,7 +76,7 @@ class ServiceTicketsTestCase(unittest.TestCase):
         This test creates a service ticket and then sends a GET request to the '/service_tickets/' endpoint.
         It asserts that the response status code is 200 (OK) and that the created ticket's VIN is in the response data.
         """
-        self.client.post('/service_tickets/', data=json.dumps(self.service_ticket), content_type='application/json')
+        self.client.post('/service_tickets/', data=json.dumps(self.service_ticket), headers=self.headers, content_type='application/json')
         res = self.client.get('/service_tickets/')
         self.assertEqual(res.status_code, 200)
         self.assertIn('1234567890ABCDEFG', str(res.data))
@@ -76,7 +87,7 @@ class ServiceTicketsTestCase(unittest.TestCase):
         This test creates a service ticket, then sends a PUT request to assign a mechanic to it.
         It asserts that the response status code is 200 (OK) and that a success message is returned.
         """
-        res = self.client.post('/service_tickets/', data=json.dumps(self.service_ticket), content_type='application/json')
+        res = self.client.post('/service_tickets/', data=json.dumps(self.service_ticket), headers=self.headers, content_type='application/json')
         ticket_id = json.loads(res.data)['id']
         
         res = self.client.put(f'/service_tickets/{ticket_id}/assign-mechanic/{self.mechanic_id}')
@@ -99,7 +110,7 @@ class ServiceTicketsTestCase(unittest.TestCase):
         This test creates a ticket, assigns a mechanic, and then sends a PUT request to remove the mechanic.
         It asserts that the removal is successful with a 200 status code.
         """
-        res = self.client.post('/service_tickets/', data=json.dumps(self.service_ticket), content_type='application/json')
+        res = self.client.post('/service_tickets/', data=json.dumps(self.service_ticket), headers=self.headers, content_type='application/json')
         ticket_id = json.loads(res.data)['id']
         self.client.put(f'/service_tickets/{ticket_id}/assign-mechanic/{self.mechanic_id}')
         
@@ -123,7 +134,7 @@ class ServiceTicketsTestCase(unittest.TestCase):
         This test first adds a mechanic to a ticket and verifies the addition.
         Then, it removes the mechanic and verifies the removal, checking the count of assigned mechanics.
         """
-        res = self.client.post('/service_tickets/', data=json.dumps(self.service_ticket), content_type='application/json')
+        res = self.client.post('/service_tickets/', data=json.dumps(self.service_ticket), headers=self.headers, content_type='application/json')
         ticket_id = json.loads(res.data)['id']
         
         edit_data = {
@@ -159,7 +170,7 @@ class ServiceTicketsTestCase(unittest.TestCase):
         This comprehensive test covers adding an inventory item, updating its quantity, and finally removing it.
         Each step asserts that the API responds correctly and the inventory state is as expected.
         """
-        res = self.client.post('/service_tickets/', data=json.dumps(self.service_ticket), content_type='application/json')
+        res = self.client.post('/service_tickets/', data=json.dumps(self.service_ticket), headers=self.headers, content_type='application/json')
         ticket_id = json.loads(res.data)['id']
 
         # Add an item
