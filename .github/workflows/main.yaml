@@ -94,7 +94,7 @@ test:
 
 deploy:
     needs: test
-    runs-on: mac-m3-15.5
+    runs-on:  ubuntu-latest
 
     steps:
       - name: Checkout Code
