@@ -49,8 +49,8 @@ build:
         run: |
           echo "Python Version: $(python --version)"
           echo "Working Directory: $(pwd)"
-          echo "Content of Working Directory: $(ls-l)"
-          echo "Contents of site-package: $(ls -l venv/lib/python*/site-packages)"n
+          echo "Content of Working Directory: $(ls -l)"
+          echo "Contents of site-package: $(ls -l venv/lib/python*/site-packages)"
 
   # Recommendation: Use artifacts to pass the workspace between jobs instead of checking out the code each time.
   # In the 'build' job, you would add:
