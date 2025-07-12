@@ -14,7 +14,7 @@ jobs: #The things we want to happen on push
   # Recommendation: Consolidate the build and test jobs into a single 'build-and-test' job to reduce redundancy.
   
 
-build:
+  build:
     runs-on: ubuntu-latest 
     steps:
       - name: Checkout Code
@@ -66,7 +66,7 @@ build:
   #   with:
   #     name: my-app
 
-test:
+  test:
     needs: build
     runs-on: ubuntu-latest  
 
@@ -92,7 +92,7 @@ test:
       - name: Run test
         run: python -m unittest discover -s app/static/tests -p 'test_*.py'
 
-deploy:
+  deploy:
     needs: test
     runs-on:  ubuntu-latest
 
